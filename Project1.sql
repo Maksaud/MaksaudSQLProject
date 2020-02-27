@@ -100,22 +100,22 @@ INNER JOIN [Order Details] od ON p.ProductID = od.ProductID
 GROUP BY od.UnitPrice*Quantity, CompanyName HAVING od.UnitPrice*Quantity > 10000;
 
 --3.3
-
-SELECT DISTINCT TOP 10
-    o.OrderID,
+SELECT TOP 10
     c.CustomerID,
-    c.CompanyName AS "Company Name",
-    o.ShippedDate AS "Shipped Date",
-    (od.UnitPrice*od.Quantity*(1-od.Discount)) AS "Value of orders"
+    C.CompanyName AS "Company Name",
+    YEAR(o.ShippedDate) AS "Only 1998",
+    SUM(od.UnitPrice*od.Quantity*(1-od.Discount)) AS "Value of orders"
 FROM Orders o
 INNER JOIN [Order Details] od ON o.OrderID = od.OrderID
 INNER JOIN customers c ON c.CustomerID = o.CustomerID
-WHERE YEAR(o.ShippedDate) = 1998
+GROUP BY c.CustomerID, C.CompanyName, YEAR(o.ShippedDate) HAVING YEAR(o.ShippedDate) = (SELECT MAX(YEAR(ShippedDate)) FROM Orders)
 ORDER BY "Value of orders" DESC;
 
 --3.4
 SELECT 
     MONTH(ShippedDate) AS 'Month',
-    AVG(DATEDIFF(day, ShippedDate, RequiredDate)) AS 'Difference in time'
+    AVG(DATEDIFF(day, OrderDate, ShippedDate)) AS 'Difference in time in hours'
 FROM Orders
-GROUP BY ShippedDate HAVING DAY(ShippedDate) = AVG(DATEDIFF(day, ShippedDate, RequiredDate));
+WHERE Month(ShippedDate) IS NOT NULL
+GROUP BY Month(ShippedDate)
+ORDER BY Month(ShippedDate)
